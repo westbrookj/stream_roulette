@@ -1,6 +1,6 @@
-# the_office_roulette
+# stream_roulette
 
-Which episode of the office are you watching tonight?
+Which episode of your favorite show are you watching tonight?
 
 ## Getting Started
 
