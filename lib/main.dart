@@ -5,14 +5,32 @@ import 'dart:async' show Future;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:url_launcher/url_launcher.dart';
 
+class Show {
+  String key;
+  String display;
+  Color headerColor;
+  Map<int, Episode> episodes;
+
+  Show(String key, String display, Color headerColor) {
+    this.key = key;
+    this.display = display;
+    this.headerColor = headerColor;
+  }
+
+  void setEpisodes(Map<int, Episode> episodes) {
+    this.episodes = episodes;
+  }
+}
+
 class Episode {
   String title;
   String description;
   int season;
   int episode;
-  String netflixUrl;
+  int overallEpisode;
+  String streamUrl;
 
-  Episode({this.title, this.description, this.season, this.episode, this.netflixUrl});
+  Episode({this.title, this.description, this.season, this.episode, this.overallEpisode, this.streamUrl});
 
   factory Episode.fromJson(Map<String, dynamic> json) {
     return Episode(
@@ -20,7 +38,8 @@ class Episode {
         description: json['description'],
         season: json['season'],
         episode: json['episode'],
-        netflixUrl: json['netflixUrl']);
+        overallEpisode: json['overallEpisode'],
+        streamUrl: json['streamUrl']);
   }
 
   Map<String, dynamic> toJson() =>
@@ -29,7 +48,8 @@ class Episode {
       'description': description,
       'season': season,
       'episode': episode,
-      'netflixUrl': netflixUrl,
+      'overallEpisode': overallEpisode,
+      'streamUrl': streamUrl,
     };
 
   @override
@@ -48,12 +68,12 @@ class Episode {
   }
 }
 
-Future<String> _loadEpisodesAsset() async {
-  return await rootBundle.loadString('assets/episodes.json');
+Future<String> _loadEpisodesAsset(String showName) async {
+  return await rootBundle.loadString('assets/episodes/$showName.json');
 }
 
-Future<Map<int, Episode>> loadEpisodes() async {
-  String jsonString = await _loadEpisodesAsset();
+Future<Map<int, Episode>> loadEpisodes(String showName) async {
+  String jsonString = await _loadEpisodesAsset(showName);
   final jsonResponse = json.decode(jsonString);
   return Episode.fromJsonList(jsonResponse);
 }
@@ -67,11 +87,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'The Office Roulette',
+      title: 'Stream Roulette',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'The Office Roulette'),
+      home: MyHomePage(title: 'Stream Roulette'),
     );
   }
 }
@@ -86,15 +106,34 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Map<int, Episode> _episodes;
+  Map<String, Show> _shows;
+  bool _loading = true;
+  Show _currentShow;
   Episode _currentEpisode;
-  int _currentEpisodeNumber;
+
+  Future<Map<String, Show>> _loadShows() async {
+    Map<String, Show> shows = {
+      "the_office": new Show('the_office', 'The Office', const Color(0xff20255e)),
+      "futurama": new Show('futurama', 'Futurama', const Color(0xff57afe1)),
+      "trailer_park_boys": new Show('trailer_park_boys', 'Trailer Park Boys', const Color(0xffc3c3c3)),
+      "new_girl": new Show('new_girl', 'New Girl', const Color(0xff1d61b0)),
+    };
+
+    for(var showKey in shows.keys) {
+      shows[showKey].setEpisodes(await loadEpisodes(showKey));
+    }
+
+    return shows;
+  }
 
   @override
   void initState() {
     super.initState();
-    loadEpisodes().then((episodes) => setState(() {
-      _episodes = episodes;
+
+    _loadShows().then((shows) => setState(() {
+      _shows = shows;
+      _currentShow = shows['the_office'];
+      _loading = false;
     }));
   }
 
@@ -110,7 +149,9 @@ class _MyHomePageState extends State<MyHomePage> {
           : null,
       child: Text(
         text,
-        style: Theme.of(context).textTheme.headline5,
+//        style: Theme.of(context).textTheme.headline5,
+        style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -125,7 +166,8 @@ class _MyHomePageState extends State<MyHomePage> {
       padding: new EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 0.0),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.headline6,
+//        style: Theme.of(context).textTheme.headline6,
+        style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -135,69 +177,119 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Container(
       padding: new EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
-      height: 100.0,
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.subtitle1,
+      height: 125.0,
+      child: SingleChildScrollView(
+        child: Text(
+          text,
+          style: Theme.of(context).textTheme.subtitle1,
+        ),
       ),
     );
   }
 
-  InkWell _currentEpisodeNetflixLink() {
+  InkWell _currentEpisodeStreamLink() {
+    String imagePath;
+    if (_currentEpisode != null) {
+      if (_currentEpisode.streamUrl.contains('netflix')) {
+        imagePath = 'assets/icons/netflix.png';
+      } else if (_currentEpisode.streamUrl.contains('hulu')) {
+        imagePath = 'assets/icons/hulu.png';
+      }
+    }
+
     return InkWell(
-      onTap: _launchNetflix,
+      onTap: _launchStream,
       child: Container(
         child: _currentEpisode != null
-            ? Image.asset('assets/netflix_icon.png', width: 75.0, height: 75.0)
+            ? Image.asset(imagePath, width: 75.0, height: 75.0)
             : null,
       ),
     );
   }
 
   Image _getCurrentEpisodeImage() {
-    return _currentEpisodeNumber != null
-        ? Image.asset('assets/thumbnails/' + _currentEpisodeNumber.toString() + '.png')
+    return _currentEpisode != null
+        ? Image.asset('assets/thumbnails/${_currentShow.key}/' + _currentEpisode.overallEpisode.toString() + '.png')
         : null;
   }
 
-  void _launchNetflix() {
+  void _launchStream() {
     if (_currentEpisode != null) {
-      launch(_currentEpisode.netflixUrl);
+      launch(_currentEpisode.streamUrl);
     }
+  }
+
+  void _setShow(String showKey) {
+    setState(() {
+      _currentShow = _shows[showKey];
+      _currentEpisode = null;
+    });
   }
 
   void _nextEpisode() {
     Random random = new Random();
-    int episodeNumber = random.nextInt(_episodes.length + 1);
+    int episodeNumber = random.nextInt(_currentShow.episodes.length + 1);
 
-    while (episodeNumber == _currentEpisodeNumber || episodeNumber == 0) {
-      episodeNumber = random.nextInt(_episodes.length + 1);
+    while (_currentEpisode != null && episodeNumber == _currentEpisode.overallEpisode || episodeNumber == 0) {
+      episodeNumber = random.nextInt(_currentShow.episodes.length + 1);
     }
 
     setState(() {
-      _currentEpisode = _episodes[episodeNumber];
-      _currentEpisodeNumber = episodeNumber;
+      _currentEpisode = _currentShow.episodes[episodeNumber];
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 80.0,
-        backgroundColor: const Color(0xff20255e),
-        title: Container(
-          alignment: Alignment.center,
-          margin: new EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),
-          child: Image.asset('assets/the_office_title_logo.png', height: 70.0),
-        )
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Expanded(
-              child: Column(
+  Color _headerBackgroundColor() {
+    return _currentShow != null
+        ? _currentShow.headerColor
+        : const Color(0xff20255e);
+  }
+
+  Container _headerTitle() {
+    String imagePath = _currentShow != null
+        ? 'assets/title_logos/${_currentShow.key}.png'
+        : 'assets/title_logos/the_office.png';
+    return Container(
+      alignment: Alignment.center,
+      margin: new EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),
+      child: new Image.asset(imagePath, height: 70.0),
+    );
+  }
+
+  List<Widget> _pageContent() {
+    return _loading == false
+      ? <Widget>[
+        Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+                padding: new EdgeInsets.fromLTRB(10.0, 10.0, 0.0, 0.0),
+                child: FloatingActionButton.extended(
+                    icon: Icon(
+                      Icons.tv,
+                      color: Colors.black,
+                      size: 30.0,
+                    ),
+                    backgroundColor: Color(0xffe0e0e0),
+                    label: DropdownButtonHideUnderline(
+                      child: DropdownButton(
+                        underline: null,
+                        value: _currentShow != null ? _currentShow.key : null,
+                        items: _shows != null
+                            ? _shows.values.map((show) {
+                          return DropdownMenuItem(
+                            value: show.key,
+                            child: Text(show.display, style: TextStyle(color: Colors.black)),
+                          );
+                        }).toList()
+                            : new List<DropdownMenuItem>(),
+                        onChanged: (showKey) => _setShow(showKey),
+                      )
+                    ),
+                ),
+            )
+        ),
+        Expanded(
+            child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Container(
@@ -207,21 +299,35 @@ class _MyHomePageState extends State<MyHomePage> {
                   _currentEpisodeTitle(),
                   _currentEpisodeSeasonEpisode(),
                   _currentEpisodeDescription(),
-                  _currentEpisodeNetflixLink(),
+                  _currentEpisodeStreamLink(),
                 ]
-              )
+            )
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            margin: new EdgeInsets.only(bottom: 35.0),
+            child: RaisedButton(
+              onPressed: _nextEpisode,
+              child: const Text('Pick Next Episode', style: TextStyle(fontSize: 20)),
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                margin: new EdgeInsets.only(bottom: 50.0),
-                child: RaisedButton(
-                  onPressed: _nextEpisode,
-                  child: const Text('Pick Next Episode', style: TextStyle(fontSize: 20)),
-                ),
-              ),
-            ),
-          ],
+          ),
+        ),
+      ] : <Widget>[CircularProgressIndicator()];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 80.0,
+        backgroundColor: _headerBackgroundColor(),
+        title: _headerTitle(),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: _pageContent(),
         ),
       ),
     );

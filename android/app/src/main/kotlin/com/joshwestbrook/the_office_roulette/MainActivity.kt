@@ -1,4 +1,4 @@
-package com.joshwestbrook.the_office_roulette
+package com.joshwestbrook.stream_roulette
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

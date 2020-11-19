@@ -1,5 +1,5 @@
-name: the_office_roulette
-description: Which episode of the office are you watching tonight?
+name: stream_roulette
+description: Which episode of your favorite show are you watching tonight?
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -36,10 +36,14 @@ dev_dependencies:
 # The following section is specific to Flutter.
 flutter:
   assets:
-    - assets/episodes.json
-    - assets/netflix_icon.png
-    - assets/the_office_title_logo.png
+    - assets/episodes/
+    - assets/icons/
+    - assets/title_logos/
     - assets/thumbnails/
+    - assets/thumbnails/the_office/
+    - assets/thumbnails/futurama/
+    - assets/thumbnails/trailer_park_boys/
+    - assets/thumbnails/new_girl/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
