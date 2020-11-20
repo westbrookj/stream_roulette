@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:stream_roulette/models/show.dart';
+import 'package:stream_roulette/components/dropdown_button_below.dart';
 
 
 class ShowDropdown extends StatelessWidget {
@@ -14,6 +15,9 @@ class ShowDropdown extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    List<Show> sortedShows = shows.values.toList();
+    sortedShows.sort((a, b) => a.display.toString().compareTo(b.display.toString()));
+
     return Align(
         alignment: Alignment.topLeft,
         child: Container(
@@ -25,12 +29,11 @@ class ShowDropdown extends StatelessWidget {
               size: 30.0,
             ),
             backgroundColor: Color(0xffe0e0e0),
-            label: DropdownButtonHideUnderline(
-                child: DropdownButton(
-                  underline: null,
+            label: DropdownButtonBelowHideUnderline(
+                child: DropdownButtonBelow(
                   value: currentShow.key,
-                  items: shows.values.map((show) {
-                    return DropdownMenuItem(
+                  items: sortedShows.map((show) {
+                    return DropdownBelowMenuItem(
                       value: show.key,
                       child: Text(show.display, style: TextStyle(color: Colors.black)),
                     );
