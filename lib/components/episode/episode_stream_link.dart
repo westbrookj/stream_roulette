@@ -19,11 +19,10 @@ class EpisodeStreamLink extends StatelessWidget {
   Widget build(BuildContext context) {
     String imagePath;
     if (episode != null) {
-      if (episode.streamUrl.contains('netflix')) {
-        imagePath = 'assets/icons/netflix.png';
-      } else if (episode.streamUrl.contains('hulu')) {
-        imagePath = 'assets/icons/hulu.png';
-      }
+      String regexString = r'^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/?\n]+)\..*';
+      RegExp regExp = new RegExp(regexString);
+      var streamProvider = regExp.firstMatch(episode.streamUrl).group(1);
+      imagePath = 'assets/icons/$streamProvider.png';
     }
 
     return InkWell(

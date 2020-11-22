@@ -74,6 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
       "trailer_park_boys": new Show('trailer_park_boys', 'Trailer Park Boys', const Color(0xffc3c3c3)),
       "new_girl": new Show('new_girl', 'New Girl', const Color(0xff1d61b0)),
       "letterkenny": new Show('letterkenny', 'Letterkenny', const Color(0xffd8bda1)),
+      "criminal_minds": new Show('criminal_minds', 'Criminal Minds', const Color(0xff000000)),
     };
 
     for(var showKey in shows.keys) {
