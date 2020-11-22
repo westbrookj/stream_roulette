@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:async' show Future;
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:http/http.dart' as http;
 
 import 'package:stream_roulette/components/episode/episode_information.dart';
 import 'package:stream_roulette/components/header/header_title.dart';
@@ -11,14 +11,10 @@ import 'package:stream_roulette/components/show_dropdown.dart';
 import 'package:stream_roulette/models/episode.dart';
 import 'package:stream_roulette/models/show.dart';
 
-Future<String> _loadEpisodesAsset(String showName) async {
-  return await rootBundle.loadString('assets/episodes/$showName.json');
-}
-
-Future<Map<int, Episode>> loadEpisodes(String showName) async {
-  String jsonString = await _loadEpisodesAsset(showName);
-  final jsonResponse = json.decode(jsonString);
-  return Episode.fromJsonList(jsonResponse);
+Future<Map<String, Show>> loadShows() async {
+  final response = await http.get('https://westbrookj.github.io/stream-roulette/shows.json');
+  final jsonResponse = json.decode(response.body);
+  return Show.fromJsonList(jsonResponse);
 }
 
 void main() async {
@@ -60,28 +56,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    _loadShows().then((shows) => setState(() {
+    loadShows().then((shows) => setState(() {
       _shows = shows;
       _currentShow = shows['the_office'];
       _loading = false;
     }));
-  }
-
-  Future<Map<String, Show>> _loadShows() async {
-    Map<String, Show> shows = {
-      "the_office": new Show('the_office', 'The Office', const Color(0xff20255e)),
-      "futurama": new Show('futurama', 'Futurama', const Color(0xff57afe1)),
-      "trailer_park_boys": new Show('trailer_park_boys', 'Trailer Park Boys', const Color(0xffc3c3c3)),
-      "new_girl": new Show('new_girl', 'New Girl', const Color(0xff1d61b0)),
-      "letterkenny": new Show('letterkenny', 'Letterkenny', const Color(0xffd8bda1)),
-      "criminal_minds": new Show('criminal_minds', 'Criminal Minds', const Color(0xff000000)),
-    };
-
-    for(var showKey in shows.keys) {
-      shows[showKey].setEpisodes(await loadEpisodes(showKey));
-    }
-
-    return shows;
   }
 
   void _setShow(String showKey) {

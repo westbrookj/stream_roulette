@@ -16,7 +16,7 @@ class ShowDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Show> sortedShows = shows.values.toList();
-    sortedShows.sort((a, b) => a.display.toString().compareTo(b.display.toString()));
+    sortedShows.sort((a, b) => a.title.toString().compareTo(b.title.toString()));
 
     return Align(
         alignment: Alignment.topLeft,
@@ -35,7 +35,7 @@ class ShowDropdown extends StatelessWidget {
                   items: sortedShows.map((show) {
                     return DropdownBelowMenuItem(
                       value: show.key,
-                      child: Text(show.display, style: TextStyle(color: Colors.black)),
+                      child: Text(show.title, style: TextStyle(color: Colors.black)),
                     );
                   }).toList(),
                   onChanged: (showKey) => handleChange(showKey),
