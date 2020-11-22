@@ -7,7 +7,6 @@ class EpisodeTitle extends StatelessWidget {
 
   final Episode episode;
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     String text = episode != null

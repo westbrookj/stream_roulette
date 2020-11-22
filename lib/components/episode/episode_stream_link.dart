@@ -14,7 +14,6 @@ class EpisodeStreamLink extends StatelessWidget {
     }
   }
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     String imagePath;
@@ -22,14 +21,14 @@ class EpisodeStreamLink extends StatelessWidget {
       String regexString = r'^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/?\n]+)\..*';
       RegExp regExp = new RegExp(regexString);
       var streamProvider = regExp.firstMatch(episode.streamUrl).group(1);
-      imagePath = 'assets/icons/$streamProvider.png';
+      imagePath = 'https://westbrookj.github.io/stream-roulette/api/icons/$streamProvider.png';
     }
 
     return InkWell(
       onTap: onTap,
       child: Container(
         child: episode != null
-            ? Image.asset(imagePath, width: 75.0, height: 75.0)
+            ? Image.network(imagePath, width: 75.0, height: 75.0)
             : null,
       ),
     );

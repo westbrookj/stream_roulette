@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:async' show Future;
 import 'package:http/http.dart' as http;
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:stream_roulette/components/episode/episode_information.dart';
 import 'package:stream_roulette/components/header/header_title.dart';
@@ -12,7 +13,7 @@ import 'package:stream_roulette/models/episode.dart';
 import 'package:stream_roulette/models/show.dart';
 
 Future<Map<String, Show>> loadShows() async {
-  final response = await http.get('https://westbrookj.github.io/stream-roulette/shows.json');
+  final response = await http.get('https://westbrookj.github.io/stream-roulette/api/shows.json');
   final jsonResponse = json.decode(response.body);
   return Show.fromJsonList(jsonResponse);
 }
@@ -50,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _loadingEpisode = false;
   Show _currentShow;
   Episode _currentEpisode;
-  NetworkImage _currentEpisodeImage;
+  CachedNetworkImageProvider _currentEpisodeImage;
 
   @override
   void initState() {
@@ -81,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     setState(() {
       _currentEpisode = _currentShow.episodes[episodeNumber];
-      _currentEpisodeImage = NetworkImage(_currentShow.episodes[episodeNumber].thumbnailUrl);
+      _currentEpisodeImage = CachedNetworkImageProvider(_currentShow.episodes[episodeNumber].thumbnailUrl);
       _loadingEpisode = true;
     });
 

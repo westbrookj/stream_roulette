@@ -25,6 +25,7 @@ dependencies:
   cupertino_icons: ^0.1.2
   url_launcher: ^5.7.10
   http: ^0.12.2
+  cached_network_image: ^2.3.3
 
 dev_dependencies:
   flutter_test:
@@ -36,9 +37,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-  assets:
-    - assets/icons/
-    - assets/title_logos/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

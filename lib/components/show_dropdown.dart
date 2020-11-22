@@ -11,8 +11,6 @@ class ShowDropdown extends StatelessWidget {
   final Show currentShow;
   final handleChange;
 
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     List<Show> sortedShows = shows.values.toList();

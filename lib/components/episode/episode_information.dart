@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:stream_roulette/components/episode/episode_image.dart';
 import 'package:stream_roulette/components/episode/episode_title.dart';
@@ -12,10 +13,9 @@ class EpisodeInformation extends StatelessWidget {
   EpisodeInformation(this.episode, this.episodeImage, this.loading);
 
   final Episode episode;
-  final NetworkImage episodeImage;
+  final CachedNetworkImageProvider episodeImage;
   final bool loading;
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return Expanded(

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class EpisodeImage extends StatelessWidget {
   EpisodeImage(this.image);
 
-  final NetworkImage image;
+  final CachedNetworkImageProvider image;
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return Container(
